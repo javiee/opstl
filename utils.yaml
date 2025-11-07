@@ -1,0 +1,11 @@
+kubeconfig: ~/.kube/config
+teamLabelSelector: "team=ela"
+filteredNamespaces:
+  - istio-system
+  - ela-dshackle-mainnet
+  - ela-gateway
+  - ela-otel-collector
+  
+  
+podSelector:
+  label: "app=nginx"
