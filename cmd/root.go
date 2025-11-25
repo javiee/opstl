@@ -46,5 +46,4 @@ func initConfig() {
 	if err != nil {
 		panic(fmt.Errorf("fatal error config file: %w", err))
 	}
-	fmt.Print(viper.Get("filteredNamespaces"))
 }

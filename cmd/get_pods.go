@@ -28,15 +28,6 @@ func init() {
 	getPodsCmd.Flags().StringVarP(&statusFilter, "status", "s", "", "Get pods filtered by status")
 }
 
-func contains(slice []string, val string) bool {
-	for _, item := range slice {
-		if item == val {
-			return true
-		}
-	}
-	return false
-}
-
 func getPods() {
 
 	clientset, err := NewClientSet()
