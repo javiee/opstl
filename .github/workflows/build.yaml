@@ -1,6 +1,9 @@
 name: p2p opstl build
 
 on:
+  push:
+    branches:
+      - 'develop'
   workflow_dispatch:
     inputs:
       branch:
@@ -20,34 +23,6 @@ env:
   DEVELOP_BRANCH: develop
 
 jobs:
-  go-build:
-    runs-on: ubuntu-latest
-    env:
-      GO111MODULE: off 
-      CGO_ENABLED: 0 
-    steps:
-      - name: Checkout Code
-        uses: actions/checkout@v3
-
-      - name: Set up go
-        uses: actions/setup-go@v4
-        with:
-          go-version: ${{ env.GO_VERSION }}
-      - name: Build
-        working-directory: ./p2p-app
-        run: go build -o main main.go
-
-      # - name: Test with Go
-      #   working-directory: ./p2p-app/tests
-      #   run: |
-      #       go test -v -json > report-${{ env.PROJECT }}.json
-      #       cat report-${{ env.PROJECT }}.json
-      # - name: Upload Go test results
-      #   uses: actions/upload-artifact@v4
-      #   with:
-      #     name: test-result
-      #     path: ./p2p-app/tests/report-${{ env.PROJECT }}.json
-
   create-tag:
     if: github.ref == 'refs/heads/develop' || github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
@@ -91,28 +66,46 @@ jobs:
             echo "Unable to determine tag"
             exit 1
           fi
-
-  docker-publish:
-    if: github.ref == 'refs/heads/develop' || github.ref == 'refs/heads/main'
+  build-mac-release:
+    needs: create-tag
+    if: needs.create-tag.outputs.tag != ''
     runs-on: ubuntu-latest
-    needs: ['create-tag']
     env:
-      DOCKER_TAG: ${{needs.create-tag.outputs.tag}}
+      TAG: ${{ needs.create-tag.outputs.tag }}
+      GO111MODULE: off
+      CGO_ENABLED: 0
     steps:
-
       - name: Checkout code
         uses: actions/checkout@v3
 
-      - name: Log in to Docker Hub
-        uses: docker/login-action@v2
+      - name: Set up Go
+        uses: actions/setup-go@v4
         with:
-          registry: ghcr.io
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
+          go-version: ${{ env.GO_VERSION }}
+        
+      - name: Build macOS amd64
+        working-directory: ./p2p-app
+        run: |
+          GOOS=darwin GOARCH=amd64 go build -o opstl-darwin-amd64 main.go
+          tar -czf opstl-darwin-amd64.tar.gz opstl-darwin-amd64
+          mv opstl-darwin-amd64.tar.gz $GITHUB_WORKSPACE/
 
-      - name: Build and Push
-        uses: docker/build-push-action@v5
+      # Build macOS arm64 (Apple Silicon M1/M2)
+      - name: Build macOS arm64
+        working-directory: ./p2p-app
+        run: |
+          GOOS=darwin GOARCH=arm64 go build -o opstl-darwin-arm64 main.go
+          tar -czf opstl-darwin-arm64.tar.gz opstl-darwin-arm64
+          mv opstl-darwin-arm64.tar.gz $GITHUB_WORKSPACE/
+
+      # Upload to release assets (only when TAG is semver)
+      - name: Upload release binaries
+        uses: softprops/action-gh-release@v1
+        if: startsWith(env.TAG, 'v')
         with:
-          context: .
-          push: true
-          tags: ghcr.io/${{ github.repository }}/opstl:${{ env.DOCKER_TAG }}
+          tag_name: ${{ env.TAG }}
+          files: |
+            opstl-darwin-amd64.tar.gz
+            opstl-darwin-arm64.tar.gz
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
