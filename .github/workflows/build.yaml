@@ -91,12 +91,13 @@ jobs:
           tar -czf opstl-darwin-arm64.tar.gz opstl-darwin-arm64
 
       # Upload to release assets (only when TAG is semver)
-      - name: Upload release binaries
+      - name: Upload release binaries (single step)
         uses: softprops/action-gh-release@v1
-        if: startsWith(env.TAG, 'v')
+        if: env.TAG != ''   # ensure tag exists at all
         with:
-          tag_name: ${{ env.TAG }}
+          tag_name: ${{ github.ref == 'refs/heads/develop' && 'dev' || env.TAG }}
           files: |
             opstl-darwin-arm64.tar.gz
+          overwrite: ${{ github.ref == 'refs/heads/develop' }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
