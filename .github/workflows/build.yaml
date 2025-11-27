@@ -1,9 +1,6 @@
 name: opstl build
 
 on:
-  push:
-    branches:
-      - 'develop'
   workflow_dispatch:
     inputs:
       branch:
