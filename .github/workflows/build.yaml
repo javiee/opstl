@@ -87,7 +87,7 @@ jobs:
       # Build macOS arm64 (Apple Silicon M1/M2)
       - name: Build macOS arm64
         run: |
-          echo "Building macOS arm64 binary, tag: ${env.TAG}"
+          echo "Building macOS arm64 binary, tag: ${{env.TAG}}"
           GOOS=darwin GOARCH=arm64 go build -o opstl-darwin-arm64 main.go
           tar -czf opstl-darwin-arm64.tar.gz opstl-darwin-arm64
 
@@ -95,7 +95,7 @@ jobs:
       - name: Upload release binaries (single step)
         uses: softprops/action-gh-release@v1
         with:
-          tag_name: ${env.TAG}
+          tag_name: ${{env.TAG}}
           files: |
             opstl-darwin-arm64.tar.gz
         env:
