@@ -71,7 +71,6 @@ jobs:
     runs-on: ubuntu-latest
     env:
       TAG: ${{ needs.create-tag.outputs.tag }}
-      GO111MODULE: off
       CGO_ENABLED: 0
     steps:
       - name: Checkout code
