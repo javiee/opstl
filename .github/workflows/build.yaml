@@ -1,4 +1,4 @@
-name: p2p opstl build
+name: opstl build
 
 on:
   push:
@@ -89,7 +89,6 @@ jobs:
         run: |
           GOOS=darwin GOARCH=arm64 go build -o opstl-darwin-arm64 main.go
           tar -czf opstl-darwin-arm64.tar.gz opstl-darwin-arm64
-          mv opstl-darwin-arm64.tar.gz $GITHUB_WORKSPACE/
 
       # Upload to release assets (only when TAG is semver)
       - name: Upload release binaries
