@@ -5,17 +5,21 @@ import (
 	"context"
 	"fmt"
 
+	"regexp"
+
 	"github.com/spf13/cobra"
 	v1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/informers"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/tools/cache"
+	"k8s.io/utils/pointer"
 )
 
 var (
 	labelSelector string
-	nameRegex     string
+	namePattern   string
+	nameRegex     *regexp.Regexp
 	prefix        string
 	podList       []v1.Pod
 )
@@ -31,10 +35,19 @@ var watchPodsCmd = &cobra.Command{
 func init() {
 	k8Cmd.AddCommand(watchPodsCmd)
 	watchPodsCmd.Flags().StringVarP(&labelSelector, "label-selector", "l", "", "Label selector to filter pods")
-	watchPodsCmd.Flags().StringVarP(&nameRegex, "name-regex", "r", "", "Prefix pod names to watch")
+	watchPodsCmd.Flags().StringVarP(&namePattern, "regex", "r", "", "Prefix pod names to watch")
 }
 
 func main() {
+
+	if labelSelector == "" && namePattern == "" {
+		fmt.Println("❌ Please provide at least a label selector or a name regex to filter pods.")
+		return
+	}
+
+	if namePattern != "" {
+		nameRegex = regexp.MustCompile(namePattern)
+	}
 
 	clientset, err := NewClientSet()
 	if err != nil {
@@ -90,6 +103,11 @@ func startPodInformer(clientset *kubernetes.Clientset, namespace string) {
 		AddFunc: func(obj interface{}) {
 			pod := obj.(*v1.Pod)
 			if pod.Status.Phase == v1.PodRunning {
+
+				if !nameRegex.MatchString(pod.Name) {
+					return // ❌ skip pods that don't match regex
+
+				}
 				streamLogs(clientset, pod)
 			}
 		},
@@ -101,6 +119,10 @@ func startPodInformer(clientset *kubernetes.Clientset, namespace string) {
 			// Detect Pending → Running transition
 			if oldPod.Status.Phase != v1.PodRunning &&
 				newPod.Status.Phase == v1.PodRunning {
+
+				if !nameRegex.MatchString(newPod.Name) {
+					return // ❌ skip pods that don't match regex
+				}
 
 				streamLogs(clientset, newPod)
 			}
@@ -117,6 +139,7 @@ func streamLogs(clientset *kubernetes.Clientset, pod *v1.Pod) {
 	req := clientset.CoreV1().Pods(pod.Namespace).GetLogs(pod.Name, &v1.PodLogOptions{
 		Container:  pod.Spec.Containers[0].Name,
 		Follow:     true,
+		TailLines:  pointer.Int64(5),
 		Timestamps: false,
 	})
 
