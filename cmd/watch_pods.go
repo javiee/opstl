@@ -26,9 +26,22 @@ var (
 
 var watchPodsCmd = &cobra.Command{
 	Use:   "watch-pods",
-	Short: "Watch pods across owned namespaces by common labels",
+	Short: "Watch and stream logs from pods in real-time",
+	Long: `Watch pods across your team's namespaces and stream their logs in real-time.
+
+Monitors for new or transitioning pods and automatically streams their logs.
+Requires at least one filter (label selector or regex pattern).
+
+Flags:
+  -l, --label-selector    Label selector to filter pods (e.g., app=myapp)
+  -r, --regex             Regex pattern to match pod names
+
+Examples:
+  opstl k8 watch-pods -l app=myapp
+  opstl k8 watch-pods --regex "myapp-.*"
+  opstl k8 watch-pods -l app=myapp -r "myapp-deployment-.*"`,
 	Run: func(cmd *cobra.Command, args []string) {
-		main() // Implementation will go here
+		main()
 	},
 }
 

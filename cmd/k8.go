@@ -8,10 +8,19 @@ var namespace string
 
 var k8Cmd = &cobra.Command{
 	Use:   "kubernetes",
-	Short: "Get all namespaces in the cluster",
-	Run: func(cmd *cobra.Command, args []string) {
+	Short: "Kubernetes operations for your team's namespaces",
+	Long: `Kubernetes operations for managing pods and events in your team's namespaces.
 
-	},
+Available Subcommands:
+  get-pods      List all pods owned by the configured team
+  get-events    List all warning events in owned namespaces
+  watch-pods    Watch and stream logs from pods in real-time
+
+Examples:
+  opstl kubernetes get-pods
+  opstl k8 get-pods --status Running
+  opstl kubectl get-events
+  opstl k8 watch-pods -l app=myapp -r "myapp-.*"`,
 }
 
 func init() {
