@@ -22,12 +22,14 @@ Commands:
     get-pods                  List all pods owned by the configured team
     get-events                List all warning events in owned namespaces
     watch-pods                Watch and stream logs from pods in real-time
+    delete-pods               Delete pods matching a regex pattern
 
 Examples:
   opstl kubernetes get-pods
   opstl k8 get-pods --status Running
   opstl k8 get-events
   opstl k8 watch-pods --label-selector app=myapp --regex "myapp-.*"
+  opstl k8 delete-pods -t "redstone-.*"
 
 Configuration:
   Place a utils.yaml file in the current directory, $HOME/.utils, or /etc/

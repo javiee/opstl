@@ -15,12 +15,14 @@ Available Subcommands:
   get-pods      List all pods owned by the configured team
   get-events    List all warning events in owned namespaces
   watch-pods    Watch and stream logs from pods in real-time
+  delete-pods   Delete pods matching a regex pattern
 
 Examples:
   opstl kubernetes get-pods
   opstl k8 get-pods --status Running
   opstl kubectl get-events
-  opstl k8 watch-pods -l app=myapp -r "myapp-.*"`,
+  opstl k8 watch-pods -l app=myapp -r "myapp-.*"
+  opstl k8 delete-pods -t "redstone-.*"`,
 }
 
 func init() {
