@@ -13,9 +13,17 @@ import (
 
 var getEventsCmd = &cobra.Command{
 	Use:   "get-events",
-	Short: "List all events in a namespace",
+	Short: "List all warning events in owned namespaces",
+	Long: `List all warning events across your team's namespaces.
+
+Displays event name, type, reason, age, and message in a formatted table.
+Only shows events of type "Warning" to help identify issues.
+
+Examples:
+  opstl k8 get-events
+  opstl kubernetes get-events`,
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println("Fetching events from ownded namespaces:")
+		fmt.Println("Fetching events from owned namespaces:")
 		getEvents()
 	},
 }

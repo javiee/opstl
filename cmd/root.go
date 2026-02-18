@@ -12,14 +12,28 @@ import (
 
 var rootCmd = &cobra.Command{
 	Use:   "opstl",
-	Short: "This cli is thought to automate multiple tasks",
-	Long: `
-	Usage:
-	kubectl `,
-	// The main action executed when no subcommand is provided:
-	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println("Hello from root command!")
-	},
+	Short: "CLI tool to automate Kubernetes operations",
+	Long: `opstl - Operations Tool
+
+A CLI tool to automate Kubernetes tasks for your team's namespaces.
+
+Commands:
+  kubernetes (k8, kubectl)    Kubernetes operations
+    get-pods                  List all pods owned by the configured team
+    get-events                List all warning events in owned namespaces
+    watch-pods                Watch and stream logs from pods in real-time
+    delete-pods               Delete pods matching a regex pattern
+
+Examples:
+  opstl kubernetes get-pods
+  opstl k8 get-pods --status Running
+  opstl k8 get-events
+  opstl k8 watch-pods --label-selector app=myapp --regex "myapp-.*"
+  opstl k8 delete-pods -t "redstone-.*"
+
+Configuration:
+  Place a utils.yaml file in the current directory, $HOME/.utils, or /etc/
+  with your team's namespace configuration.`,
 }
 
 // Execute adds all child commands to the root command and sets flags appropriately.

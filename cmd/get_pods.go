@@ -17,8 +17,19 @@ var (
 var getPodsCmd = &cobra.Command{
 	Use:   "get-pods",
 	Short: "List all pods owned by the configured team",
+	Long: `List all pods across your team's namespaces.
+
+Displays pod name, namespace, status, and age in a formatted table.
+
+Flags:
+  -s, --status    Filter pods by status (e.g., Running, Pending, Failed)
+
+Examples:
+  opstl k8 get-pods
+  opstl k8 get-pods --status Running
+  opstl k8 get-pods -s Pending`,
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println("Fetching events:")
+		fmt.Println("Fetching pods:")
 		getPods()
 	},
 }
